@@ -37,14 +37,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<string | null>(
     () => localStorage.getItem(USER_KEY),
   )
-  const [route, setRoute] = useState<Route>('dashboard')
+  const [route, setRoute] = useState<Route>('assessment')
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null)
 
   const login = useCallback((username: string) => {
     const name = username.trim() || '医生'
     localStorage.setItem(USER_KEY, name)
     setUser(name)
-    setRoute('dashboard')
+    setRoute('assessment')
   }, [])
 
   const logout = useCallback(() => {

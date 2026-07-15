@@ -2,11 +2,9 @@ import { useRoute } from '../app/AppContext'
 import { Route } from '../types'
 
 const NAV: { route: Route; label: string; icon: string }[] = [
-  { route: 'dashboard', label: '仪表盘', icon: '▦' },
   { route: 'patients', label: '患者管理', icon: '👤' },
   { route: 'assessment', label: '康复评估', icon: '✚' },
   { route: 'records', label: '评估记录总览', icon: '🗂' },
-  { route: 'stats', label: '统计分析', icon: '📊' },
   { route: 'system', label: '系统管理', icon: '⚙' },
 ]
 

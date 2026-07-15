@@ -63,10 +63,6 @@ export default function SystemManagementPage() {
                 {health ? health.models_loaded.join('、') || '无' : '—'}
               </span>
             </div>
-            <div className="info-item">
-              <span className="info-label">报告模型</span>
-              <span className="info-value">Yi-1.5-6B（QLoRA）</span>
-            </div>
           </div>
         </div>
       </div>

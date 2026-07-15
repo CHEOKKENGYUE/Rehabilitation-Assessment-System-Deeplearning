@@ -17,11 +17,9 @@ export const DIAGNOSIS_OPTIONS = ['脑外伤', '脑梗死', '脑出血', '其他
 
 // Navigation routes (no react-router; route enum drives the AppShell). ------ //
 export type Route =
-  | 'dashboard'
   | 'patients'
   | 'assessment'
   | 'records'
-  | 'stats'
   | 'system'
 
 // Backend-mirrored persistence types --------------------------------------- //
