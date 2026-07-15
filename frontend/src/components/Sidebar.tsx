@@ -4,8 +4,8 @@ import logo from '../assets/logo.png'
 
 const NAV: { route: Route; label: string; icon: string }[] = [
   { route: 'patients', label: '患者管理', icon: '👤' },
-  { route: 'assessment', label: '康复评估', icon: '✚' },
-  { route: 'records', label: '评估记录总览', icon: '🗂' },
+  { route: 'assessment', label: 'FMA 分数预测', icon: '✚' },
+  { route: 'records', label: 'FMA 分数预测记录总览', icon: '🗂' },
   { route: 'system', label: '系统管理', icon: '⚙' },
 ]
 
@@ -16,7 +16,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-brand">
         <img className="sidebar-org-logo" src={logo} alt="珠海复旦创新研究院" />
-        <span>珠海复旦创新研究院康复评估系统</span>
+        <span>基于脑电肌电和运动信号的手部康复FMA评分预测软件 V1.0</span>
       </div>
       <nav className="sidebar-nav">
         {NAV.map((item) => (

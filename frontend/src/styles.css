@@ -986,7 +986,7 @@ body::before {
   min-height: 100vh;
 }
 .sidebar {
-  width: 222px;
+  width: 248px;
   flex-shrink: 0;
   color: var(--ink-500);
   background: var(--surface);
@@ -1032,6 +1032,7 @@ body::before {
   border-radius: 9px;
   cursor: pointer;
   text-align: left;
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 .sidebar-item:hover { background: var(--surface-inset); color: var(--ink-900); }

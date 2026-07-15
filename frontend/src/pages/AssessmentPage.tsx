@@ -177,7 +177,7 @@ export default function AssessmentPage() {
     <div>
       <div className="page-head">
         <div>
-          <h1 className="page-title">康复评估</h1>
+          <h1 className="page-title">FMA 分数预测</h1>
           <p className="page-sub">EEG · EMG · IMU 多模态融合　/　CMK-AGN</p>
         </div>
         {phase === 'processing' && (

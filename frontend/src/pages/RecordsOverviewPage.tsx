@@ -31,7 +31,7 @@ export default function RecordsOverviewPage() {
     <div>
       <div className="page-head">
         <div>
-          <h1 className="page-title">评估记录总览</h1>
+          <h1 className="page-title">FMA 分数预测记录总览</h1>
           <p className="page-sub">跨患者按时间排列的全部评估记录（共 {total} 条）</p>
         </div>
         <input

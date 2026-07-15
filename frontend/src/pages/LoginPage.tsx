@@ -25,7 +25,7 @@ export default function LoginPage() {
             </svg>
           </div>
           <div>
-            <h1>珠海复旦创新研究院康复评估系统</h1>
+            <h1>基于脑电肌电和运动信号的手部康复FMA评分预测软件 V1.0</h1>
             <div className="subtitle">EEG · EMG · IMU 多模态融合　/　CMK-AGN </div>
           </div>
         </div>

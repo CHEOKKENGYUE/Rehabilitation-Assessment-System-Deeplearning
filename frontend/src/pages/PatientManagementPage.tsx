@@ -30,7 +30,7 @@ function PatientListView({ onOpen }: { onOpen: (id: number) => void }) {
       <div className="page-head">
         <div>
           <h1 className="page-title">患者管理</h1>
-          <p className="page-sub">通过智能康复评估的患者档案，按患者聚合多次评估记录</p>
+          <p className="page-sub">通过FMA 分数预测的患者档案，按患者聚合多次评估记录</p>
         </div>
       </div>
 
@@ -40,7 +40,7 @@ function PatientListView({ onOpen }: { onOpen: (id: number) => void }) {
         {patients === null ? (
           <p className="muted">加载中…</p>
         ) : patients.length === 0 ? (
-          <p className="muted">暂无患者记录。完成一次康复评估后将自动归档到此处。</p>
+          <p className="muted">暂无患者记录。完成一次FMA 分数预测后将自动归档到此处。</p>
         ) : (
           <table className="data-table">
             <thead>
