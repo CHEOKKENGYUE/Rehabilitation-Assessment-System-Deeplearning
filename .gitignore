@@ -1,0 +1,24 @@
+# Node / frontend
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# Databases
+*.db
+*.db-wal
+*.db-shm
+
+# Caches
+.cache/
+
+# OS / editor
+.DS_Store
+.vscode/

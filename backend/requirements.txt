@@ -1,0 +1,13 @@
+# Backend deps for the local, 3-indicator build (FMA手部分数 / 手部肌张力 /
+# Brunnstrom 分期). Runs fully on CPU — no GPU, no LLM, no MySQL, no remote
+# service. This is all you need on a CPU-only machine (e.g. a Mac).
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
+pydantic>=2.6.0
+numpy>=1.26.0
+pandas>=2.1.0
+scipy>=1.11.0
+mne>=1.6.0          # reads real-patient .bdf EEG (load_eeg_bdf); CPU-only, deps on numpy/scipy
+torch>=2.1.0
+python-dotenv>=1.0.1
