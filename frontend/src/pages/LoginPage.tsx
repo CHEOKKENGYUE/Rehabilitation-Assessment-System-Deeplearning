@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../app/AppContext'
+import logo from '../assets/logo.png'
 
 // Frontend-only demo login: any credentials enter the system. The username is
 // shown in the top bar and persisted in localStorage.
@@ -16,6 +17,7 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <form className="login-card" onSubmit={submit}>
+        <img className="login-org-logo" src={logo} alt="珠海复旦创新研究院" />
         <div className="login-brand">
           <div className="brand-logo" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -23,8 +25,8 @@ export default function LoginPage() {
             </svg>
           </div>
           <div>
-            <h1>智能康复评估平台</h1>
-            <div className="subtitle">EEG · EMG · IMU 多模态融合　/　CMK-AGN × Yi-1.5-6B</div>
+            <h1>珠海复旦创新研究院康复评估系统</h1>
+            <div className="subtitle">EEG · EMG · IMU 多模态融合　/　CMK-AGN </div>
           </div>
         </div>
 

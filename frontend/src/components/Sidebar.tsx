@@ -1,5 +1,6 @@
 import { useRoute } from '../app/AppContext'
 import { Route } from '../types'
+import logo from '../assets/logo.png'
 
 const NAV: { route: Route; label: string; icon: string }[] = [
   { route: 'patients', label: '患者管理', icon: '👤' },
@@ -14,12 +15,8 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="brand-logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 12h3l2 -6 3 12 3 -8 2 4h7" />
-          </svg>
-        </div>
-        <span>智能康复评估</span>
+        <img className="sidebar-org-logo" src={logo} alt="珠海复旦创新研究院" />
+        <span>珠海复旦创新研究院康复评估系统</span>
       </div>
       <nav className="sidebar-nav">
         {NAV.map((item) => (
