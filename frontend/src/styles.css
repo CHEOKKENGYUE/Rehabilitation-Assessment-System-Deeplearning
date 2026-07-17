@@ -735,6 +735,127 @@ body::before {
   gap: 16px;
 }
 
+/* ---- Single-indicator (FMA) hero result — centered radial dial ---------- */
+.fma-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 0 6px;
+  animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fma-gauge {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.fma-gauge svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.fma-gauge-track {
+  fill: none;
+  stroke: var(--surface-inset);
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+.fma-gauge-progress {
+  fill: none;
+  stroke: url(#fmaArc);
+  stroke-width: 13;
+  stroke-linecap: round;
+  filter: drop-shadow(0 2px 6px rgba(14, 124, 138, 0.28));
+  transition: stroke-dasharray 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fma-gauge-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.fma-score {
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: var(--teal-700);
+}
+
+.fma-unit {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ink-400);
+}
+
+.fma-caption {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.fma-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-400);
+}
+
+.fma-band {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-700);
+  padding: 6px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-inset);
+}
+
+/* Compact FMA card inside an expanded history record. */
+.record-fma {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px 16px;
+  background: var(--surface-inset);
+}
+
+.record-fma-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.record-fma-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--teal-700);
+  letter-spacing: -0.02em;
+}
+
+.record-fma-value .fma-unit {
+  margin-left: 6px;
+}
+
 .result-card {
   position: relative;
   border: 1px solid var(--line);

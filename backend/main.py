@@ -109,7 +109,7 @@ def _save_uploads(files: List[UploadFile], destdir: Path, prefix: str) -> List[P
 
 
 def _worker(state: SessionState, registry: ModelRegistry) -> None:
-    """Run the full 3-indicator inference pipeline on a worker thread."""
+    """Run the FMA inference pipeline on a worker thread."""
     try:
         predictions_raw = run_pipeline(
             state.eeg_paths, state.emg_paths, registry, state.queue,
@@ -118,8 +118,6 @@ def _worker(state: SessionState, registry: ModelRegistry) -> None:
 
         predictions = PredictionResult(
             FMA_UE=float(predictions_raw["FMA_UE"]),
-            hand_tone=str(predictions_raw["hand_tone"]),
-            hand_function=int(predictions_raw["hand_function"]),
         )
 
         state.result = AssessmentResult(

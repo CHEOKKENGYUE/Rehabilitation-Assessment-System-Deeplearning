@@ -1,14 +1,15 @@
 """Inference pipeline driver — wraps Deeplearning/ into an SSE-friendly flow.
 
-Loads the three pretrained CMK-AGN models once at startup, then for every
+Loads the pretrained CMK-AGN model once at startup, then for every
 session runs the 6 processing steps (parse → preprocess → alignment →
 feature_extract → graph_fusion → inference) on a thread pool, pushing
 fine-grained progress events onto a `queue.Queue` consumed by the SSE endpoint.
 
-This is the local, 3-indicator build: it predicts only FMA手部分数, 手部肌张力
-(Hand-MAS) and Brunnstrom 分期. Barthel指数 (BI) prediction, the 26-item digital
-biomarker extraction and the LLM rehab report have been removed so the whole
-platform runs on CPU with no GPU / remote service.
+This is the local, single-indicator build: it predicts only the FMA手部分数.
+手部肌张力 (Hand-MAS) and Brunnstrom 分期 prediction, Barthel指数 (BI)
+prediction, the 26-item digital biomarker extraction and the LLM rehab report
+have been removed so the whole platform runs on CPU with no GPU / remote
+service.
 
 (CMK-AGN is the public-facing name; the internal backbone class is still
 ``ADKMDFANTriBackbone`` in Deeplearning/, kept as-is to stay bound to the
@@ -54,36 +55,23 @@ from task_config import (  # noqa: E402
 )
 
 
-# 3 tasks served by this local platform (subset of the 5 trained tasks).
-SERVED_TASKS: Tuple[str, ...] = ("FMA_UE", "hand_tone", "hand_function")
+# Single task served by this local platform (subset of the 5 trained tasks).
+SERVED_TASKS: Tuple[str, ...] = ("FMA_UE",)
 
 CHECKPOINTS: Dict[str, Path] = {
     "FMA_UE": DL_MODEL_DIR / "FMA_UE_fold1.pth",
-    "hand_tone": DL_MODEL_DIR / "hand_tone_fold2.pth",
-    "hand_function": DL_MODEL_DIR / "hand_function_fold3.pth",
 }
 
 # Front-facing labels used in the SSE `prediction` event (matches design doc).
-# Note: task keys hand_tone / hand_function are kept for backwards-compat with
-# the trained checkpoints; clinically they are Hand MAS and Brunnstrom (hand).
 PREDICTION_LABELS: Dict[str, Dict[str, Any]] = {
     "FMA_UE": {"label": "FMA手部分数", "range": "0–20"},
-    "hand_tone": {"label": "手部肌张力 (Hand MAS)"},
-    "hand_function": {"label": "Brunnstrom 分期 (手)"},
 }
 
 # --------------------------------------------------------------------------- #
-# Physician-readable clinical reasoning for each predicted score.             #
-# These translate the raw model output into a one-line clinical reading shown #
-# to the rehab physician (semantics kept consistent with the frontend's       #
-# HAND_TONE_DESC / BRUNNSTROM_DESC so the UI and the reasoning stay aligned).  #
-# The reading lookup tables live in the torch-free `inference_readings` module. #
+# Physician-readable clinical reasoning for the predicted score.              #
+# Translates the raw model output into a one-line clinical reading shown to    #
+# the rehab physician.                                                         #
 # --------------------------------------------------------------------------- #
-from inference_readings import (  # noqa: E402
-    BRUNNSTROM_READING as _BRUNNSTROM_READING,
-    HAND_TONE_READING as _HAND_TONE_READING,
-)
-
 def _fma_reading(value: float) -> str:
     """FMA-UE hand subscore (0–20) → upper-limb motor impairment band."""
     v = float(value)
@@ -106,16 +94,6 @@ def clinical_reasoning(task: str, value: Any) -> str:
     """
     if task == "FMA_UE":
         return "临床推理 · " + _fma_reading(value)
-    if task == "hand_tone":
-        reading = _HAND_TONE_READING.get(str(value), "肌张力分级结果")
-        return f"临床推理 · 手部肌张力 Hand MAS {value} 级，{reading}"
-    if task == "hand_function":
-        try:
-            stage = int(value)
-        except (TypeError, ValueError):
-            stage = value  # type: ignore[assignment]
-        reading = _BRUNNSTROM_READING.get(stage, "手功能分期结果")  # type: ignore[arg-type]
-        return f"临床推理 · 手功能分期 Brunnstrom {value} 期，{reading}"
     return f"临床推理 · {task} = {value}"
 
 
@@ -223,7 +201,7 @@ class ModelRegistry:
         """Predict for ONE subject given aligned tri-modal trials (B, S, C, T).
 
         - regression  → float scalar (already clipped)
-        - classification → original-class label (string for hand_tone, int for hand_function)
+        - classification → original-class label
         """
         bundle = self.models[name]
         model = bundle.model
@@ -317,7 +295,7 @@ def run_pipeline(
     ``institution`` ("hospital" | "device") selects the per-trial signal loader
     + column validators so the same pipeline can serve both data formats; the
     local build always uses "hospital". Returns a dict {task: prediction_value}
-    for the three served tasks (FMA_UE / hand_tone / hand_function).
+    for the served task (FMA_UE).
     """
     try:
         return _run_pipeline_inner(eeg_paths, emg_paths, registry, q, institution)
@@ -435,8 +413,6 @@ def _run_pipeline_inner(
     results: Dict[str, Any] = {}
     task_detail = {
         "FMA_UE": "正在评估 FMA 手部运动功能评分...",
-        "hand_tone": "正在评估手部肌张力 (Hand MAS) 分级...",
-        "hand_function": "正在评估手功能 Brunnstrom 分期...",
     }
     for task in SERVED_TASKS:
         q.put(step_detail("inference", task_detail[task]))

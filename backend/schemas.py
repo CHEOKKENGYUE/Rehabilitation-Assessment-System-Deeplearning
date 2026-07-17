@@ -18,8 +18,6 @@ class PatientInfo(BaseModel):
 
 class PredictionResult(BaseModel):
     FMA_UE: float = Field(..., ge=0.0, le=20.0, description="FMA手部分数")
-    hand_tone: str = Field(..., description='手部肌张力："0"/"1"/"1+"/"2"/"3"/"4"')
-    hand_function: int = Field(..., ge=1, le=6, description="Brunnstrom分期 1–6")
 
 
 class AssessSessionResponse(BaseModel):
@@ -61,8 +59,6 @@ class AssessmentRecord(BaseModel):
     session_id: Optional[str] = None
     created_at: str
     fma_ue: float
-    hand_tone: str
-    hand_function: int
 
 
 class PatientSummary(BaseModel):
@@ -95,8 +91,6 @@ class AssessmentOverviewItem(BaseModel):
     patient_id: str
     name: str
     fma_ue: float
-    hand_tone: str
-    hand_function: int
 
 
 class AssessmentOverview(BaseModel):
@@ -108,6 +102,5 @@ class StatsSummary(BaseModel):
     patient_count: int
     assessment_count: int
     diagnosis_distribution: Dict[str, int]
-    hand_function_distribution: Dict[str, int]
     avg_fma_ue: Optional[float] = None
     assessments_by_day: List[Dict[str, Union[str, int]]]

@@ -4,81 +4,70 @@ interface Props {
   results: Partial<Record<TaskKey, PredictionEntry>>
 }
 
-const HAND_TONE_DESC: Record<string, string> = {
-  '0': '正常张力',
-  '1': '轻度增高',
-  '1+': '轻中度增高',
-  '2': '中度增高',
-  '3': '重度增高',
-  '4': '强直状态',
+// FMA-UE hand subscore (0–20) → upper-limb motor impairment band.
+function fmaBand(v: number): string {
+  if (v <= 5) return '重度上肢运动功能障碍'
+  if (v <= 10) return '中重度上肢运动功能障碍'
+  if (v <= 15) return '中度上肢运动功能障碍'
+  return '轻度上肢运动功能障碍'
 }
 
-const BRUNNSTROM_DESC: Record<number, string> = {
-  1: '弛缓期，无主动运动',
-  2: '联合反应出现',
-  3: '可引出共同运动',
-  4: '部分分离运动',
-  5: '分离运动明显',
-  6: '接近正常',
-}
+// Radial dial geometry — a 270° arc gauge (gap centered at the bottom).
+const R = 64
+const C = 2 * Math.PI * R
+const ARC = 0.75 // 270° of the full circle
+const TRACK = ARC * C
 
 export default function ResultsPanel({ results }: Props) {
-  const entries: TaskKey[] = ['FMA_UE', 'hand_tone', 'hand_function']
-  const visible = entries.filter((k) => results[k] !== undefined)
-  if (visible.length === 0) return null
+  const entry = results.FMA_UE
+  if (!entry) return null
+
+  const v = typeof entry.value === 'number' ? entry.value : parseFloat(String(entry.value))
+  const pct = Math.max(0, Math.min(100, (v / 20) * 100))
+  const progress = (pct / 100) * TRACK
 
   return (
     <div className="card">
       <h2>
         评估结果
-        <span className="h2-suffix">Clinical · Scores</span>
+        <span className="h2-suffix">Clinical · Score</span>
       </h2>
-      <div className="results-grid">
-        {visible.map((k) => (
-          <ResultCard key={k} entry={results[k]!} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function ResultCard({ entry }: { entry: PredictionEntry }) {
-  if (entry.task === 'FMA_UE') {
-    const v = typeof entry.value === 'number' ? entry.value : parseFloat(String(entry.value))
-    return (
-      <div className="result-card">
-        <div className="label">{entry.label}</div>
-        <div className="value">
-          {v.toFixed(0)}
-          <span className="unit">/ 20 分</span>
+      <div className="fma-result">
+        <div className="fma-gauge">
+          <svg viewBox="0 0 160 160" role="img" aria-label={`FMA 手部分数 ${v.toFixed(0)} / 20 分`}>
+            <defs>
+              <linearGradient id="fmaArc" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="var(--teal-500)" />
+                <stop offset="100%" stopColor="var(--cyan-400)" />
+              </linearGradient>
+            </defs>
+            <g transform="rotate(135 80 80)">
+              <circle
+                className="fma-gauge-track"
+                cx="80"
+                cy="80"
+                r={R}
+                strokeDasharray={`${TRACK} ${C}`}
+              />
+              <circle
+                className="fma-gauge-progress"
+                cx="80"
+                cy="80"
+                r={R}
+                strokeDasharray={`${progress} ${C}`}
+              />
+            </g>
+          </svg>
+          <div className="fma-gauge-center">
+            <span className="fma-score">{v.toFixed(0)}</span>
+            <span className="fma-unit">/ 20 分</span>
+          </div>
         </div>
-        <div className="progress-bar">
-          <div style={{ width: `${(v / 20) * 100}%` }} />
+        <div className="fma-caption">
+          <div className="fma-label">{entry.label || 'FMA 手部分数'}</div>
+          <div className="fma-band">{fmaBand(v)}</div>
         </div>
       </div>
-    )
-  }
-  if (entry.task === 'hand_tone') {
-    const v = String(entry.value)
-    return (
-      <div className="result-card">
-        <div className="label">手部肌张力 · Hand MAS（Modified Ashworth）</div>
-        <div className="value">
-          {v}<span className="unit">级</span>
-        </div>
-        <div className="meta">{HAND_TONE_DESC[v] || '—'}</div>
-      </div>
-    )
-  }
-  // hand_function
-  const v = typeof entry.value === 'number' ? entry.value : parseInt(String(entry.value), 10)
-  return (
-    <div className="result-card">
-      <div className="label">手功能 · Brunnstrom 分期</div>
-      <div className="value">
-        Brunnstrom {v}<span className="unit">期</span>
-      </div>
-      <div className="meta">{BRUNNSTROM_DESC[v] || '—'}</div>
     </div>
   )
 }

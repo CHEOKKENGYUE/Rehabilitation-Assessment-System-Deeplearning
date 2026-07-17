@@ -1,6 +1,6 @@
-# Backend deps for the local, 3-indicator build (FMA手部分数 / 手部肌张力 /
-# Brunnstrom 分期). Runs fully on CPU — no GPU, no LLM, no MySQL, no remote
-# service. This is all you need on a CPU-only machine (e.g. a Mac).
+# Backend deps for the local, single-indicator build (FMA手部分数). Runs fully
+# on CPU — no GPU, no LLM, no MySQL, no remote service. This is all you need on
+# a CPU-only machine (e.g. a Mac).
 fastapi>=0.110.0
 uvicorn[standard]>=0.27.0
 python-multipart>=0.0.9

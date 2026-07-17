@@ -28,8 +28,6 @@ export interface AssessmentRecord {
   session_id: string | null
   created_at: string
   fma_ue: number
-  hand_tone: string
-  hand_function: number
 }
 
 export interface PatientSummary {
@@ -75,8 +73,6 @@ export interface AssessmentOverviewItem {
   patient_id: string
   name: string
   fma_ue: number
-  hand_tone: string
-  hand_function: number
 }
 
 export interface AssessmentOverview {
@@ -88,7 +84,6 @@ export interface StatsSummary {
   patient_count: number
   assessment_count: number
   diagnosis_distribution: Record<string, number>
-  hand_function_distribution: Record<string, number>
   avg_fma_ue: number | null
   assessments_by_day: { date: string; count: number }[]
 }
@@ -110,7 +105,7 @@ export interface StepState {
   details: string[]
 }
 
-export type TaskKey = 'FMA_UE' | 'hand_tone' | 'hand_function'
+export type TaskKey = 'FMA_UE'
 
 export interface PredictionEntry {
   task: TaskKey

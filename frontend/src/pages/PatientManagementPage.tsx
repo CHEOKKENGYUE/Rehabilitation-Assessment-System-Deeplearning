@@ -272,7 +272,7 @@ function PatientDetailView({ id }: { id: number }) {
                   >
                     <span className="record-time">{fmtDateTime(rec.created_at)}</span>
                     <span className="record-summary">
-                      FMA {Math.round(rec.fma_ue)} · 张力 {rec.hand_tone} 级 · Brunnstrom {rec.hand_function} 期
+                      FMA {Math.round(rec.fma_ue)} / 20 分
                     </span>
                     <span className="record-caret">{open ? '▾' : '▸'}</span>
                   </button>

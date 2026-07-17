@@ -70,9 +70,7 @@ def init_db() -> None:
                   patient_db_id   INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
                   session_id      TEXT,
                   created_at      TEXT NOT NULL,
-                  fma_ue          REAL NOT NULL,
-                  hand_tone       TEXT NOT NULL,
-                  hand_function   INTEGER NOT NULL
+                  fma_ue          REAL NOT NULL
                 );
 
                 CREATE INDEX IF NOT EXISTS idx_assessments_patient
@@ -81,7 +79,40 @@ def init_db() -> None:
                   ON assessments(created_at);
                 """
             )
+            _migrate_drop_legacy_indicators(conn)
         _initialized = True
+
+
+def _migrate_drop_legacy_indicators(conn: sqlite3.Connection) -> None:
+    """Drop the legacy ``hand_tone`` / ``hand_function`` columns from an older
+    ``assessments`` table so this single-indicator (FMA) build can INSERT rows.
+
+    Rebuilds the table (create-copy-drop-rename) rather than relying on
+    ``ALTER TABLE DROP COLUMN`` so it works on any SQLite version.
+    """
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(assessments)").fetchall()}
+    if not ({"hand_tone", "hand_function"} & cols):
+        return
+    conn.executescript(
+        """
+        CREATE TABLE assessments_new (
+          id              INTEGER PRIMARY KEY AUTOINCREMENT,
+          patient_db_id   INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+          session_id      TEXT,
+          created_at      TEXT NOT NULL,
+          fma_ue          REAL NOT NULL
+        );
+        INSERT INTO assessments_new (id, patient_db_id, session_id, created_at, fma_ue)
+          SELECT id, patient_db_id, session_id, created_at, fma_ue FROM assessments;
+        DROP TABLE assessments;
+        ALTER TABLE assessments_new RENAME TO assessments;
+
+        CREATE INDEX IF NOT EXISTS idx_assessments_patient
+          ON assessments(patient_db_id);
+        CREATE INDEX IF NOT EXISTS idx_assessments_created
+          ON assessments(created_at);
+        """
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -198,37 +229,34 @@ def insert_assessment(
     created_at: Optional[str] = None,
 ) -> int:
     """Insert one assessment row. ``predictions`` is a PredictionResult
-    (FMA_UE / hand_tone / hand_function)."""
+    (FMA_UE)."""
     with get_conn() as conn:
         cur = conn.execute(
             """
             INSERT INTO assessments
-              (patient_db_id, session_id, created_at, fma_ue,
-               hand_tone, hand_function)
-            VALUES (?, ?, ?, ?, ?, ?)
+              (patient_db_id, session_id, created_at, fma_ue)
+            VALUES (?, ?, ?, ?)
             """,
             (
                 patient_db_id,
                 session_id,
                 created_at or now_iso(),
                 float(predictions.FMA_UE),
-                str(predictions.hand_tone),
-                int(predictions.hand_function),
             ),
         )
     return int(cur.lastrowid)
 
 
 def latest_assessment_for_patient(patient_id: str) -> Optional[Dict[str, Any]]:
-    """Return the most recent assessment (3 indicators) for a business
-    ``patient_id``, or None if the patient has no prior assessment.
+    """Return the most recent assessment (FMA) for a business ``patient_id``,
+    or None if the patient has no prior assessment.
 
-    Returns a plain dict with keys ``fma_ue/hand_tone/hand_function/created_at``.
+    Returns a plain dict with keys ``fma_ue/created_at``.
     """
     with get_conn() as conn:
         row = conn.execute(
             """
-            SELECT a.fma_ue, a.hand_tone, a.hand_function, a.created_at
+            SELECT a.fma_ue, a.created_at
             FROM assessments a
             JOIN patients p ON p.id = a.patient_db_id
             WHERE p.patient_id = ?
@@ -248,8 +276,7 @@ def list_assessments_for_patient(
     try:
         rows = conn.execute(
             """
-            SELECT id, session_id, created_at, fma_ue, hand_tone,
-                   hand_function
+            SELECT id, session_id, created_at, fma_ue
             FROM assessments
             WHERE patient_db_id = ?
             ORDER BY created_at DESC, id DESC
@@ -269,7 +296,7 @@ def list_all_assessments(limit: int = 50, offset: int = 0) -> Dict[str, Any]:
             """
             SELECT a.id, a.created_at, a.patient_db_id,
                    p.patient_id, p.name,
-                   a.fma_ue, a.hand_tone, a.hand_function
+                   a.fma_ue
             FROM assessments a
             JOIN patients p ON p.id = a.patient_db_id
             ORDER BY a.created_at DESC, a.id DESC
@@ -293,9 +320,6 @@ def stats_summary() -> Dict[str, Any]:
         diag_rows = conn.execute(
             "SELECT diagnosis, COUNT(*) AS c FROM patients GROUP BY diagnosis"
         ).fetchall()
-        hand_rows = conn.execute(
-            "SELECT hand_function, COUNT(*) AS c FROM assessments GROUP BY hand_function"
-        ).fetchall()
         avg_row = conn.execute(
             "SELECT AVG(fma_ue) AS fma FROM assessments"
         ).fetchone()
@@ -313,9 +337,6 @@ def stats_summary() -> Dict[str, Any]:
         "patient_count": int(patient_count),
         "assessment_count": int(assessment_count),
         "diagnosis_distribution": {r["diagnosis"]: int(r["c"]) for r in diag_rows},
-        "hand_function_distribution": {
-            str(r["hand_function"]): int(r["c"]) for r in hand_rows
-        },
         "avg_fma_ue": round(avg_row["fma"], 1) if avg_row["fma"] is not None else None,
         "assessments_by_day": [
             {"date": r["date"], "count": int(r["count"])} for r in reversed(day_rows)
